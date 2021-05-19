@@ -1,0 +1,7 @@
+.envrc
+.vscode
+.idea
+__pycache__
+venv
+__MACOSX
+.cache
