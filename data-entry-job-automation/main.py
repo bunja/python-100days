@@ -1,6 +1,14 @@
 from bs4 import BeautifulSoup
 import requests
 
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import ElementClickInterceptedException
+import time
+import os
+
+
 header = {
     "Accept-Language":"ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6",
     "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
@@ -29,5 +37,25 @@ for listing in listings:
     }
     data_list.append(a)
 
-print(data_list)
+# selenium sheet
+
+chrome_driver_path = "/home/larisa/dev/chromedriver_linux64/chromedriver"
+driver = webdriver.Chrome(executable_path=chrome_driver_path)
+form_url = "https://docs.google.com/forms/d/e/1FAIpQLSdLwT8kIUHze3V8-wJ2LRB5CWUf4vRniUWopzDsu2ZsbdEi9g/viewform"
+driver.get(form_url)
+time.sleep(2)
+for el in data_list:
+    address_input = driver.find_element_by_xpath('//*[@id="mG61Hd"]/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input')
+    address_input.send_keys(el['address'])
+    price_input = driver.find_element_by_xpath('//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div/div[1]/input')
+    price_input.send_keys(el['price'])
+    link_input = driver.find_element_by_xpath('//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div/div[1]/input')
+    link_input.send_keys(el['url'])
+    submit = driver.find_element_by_xpath('//*[@id="mG61Hd"]/div[2]/div/div[3]/div[1]/div/div/span')
+    submit.click()
+    time.sleep(3)
+    another_response = driver.find_element_by_xpath('/html/body/div[1]/div[2]/div[1]/div/div[4]/a')
+    another_response.click()
+    time.sleep(2)
+
 
