@@ -1,21 +1,51 @@
 body {
     font-family: 'Montserrat';
+    text-align: center;
 }
 
-#title {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Montserrat-Bold";
+}
+
+h2 {
+    font-weight: bold;
+    color: #fff;
+}
+
+
+/* sections */
+
+.colored-section {
     background-color: #ff4c68;
     color: #fff;
 }
 
-.container-fluid {
-    padding: 3% 15%;
+.white-section {
+    background-color: blanchedalmond;
 }
 
-h1 {
-    font-family: 'Montserrat, sans-serif';
+
+/* headings */
+
+.big-heading {
+    font-family: 'Montserrat-Black';
     font-size: 4.5rem;
     line-height: 1.5;
     font-weight: 900;
+}
+
+.section-heading {
+    font-size: 3rem;
+    line-height: 1.5;
+}
+
+.container-fluid {
+    padding: 7% 15%;
 }
 
 
@@ -41,6 +71,14 @@ h1 {
 }
 
 
+/* * Title Section */
+
+#title .container-fluid {
+    padding: 3% 15% 7%;
+    text-align: left;
+}
+
+
 /* download buttons */
 
 .download-button {
@@ -50,7 +88,113 @@ h1 {
 
 /* title image */
 
+.title-image-container {
+    position: absolute;
+}
+
 .title-image {
     width: 60%;
-    transform: rotate(25deg)
+    transform: rotate(25deg);
+    right: 50%;
+}
+
+
+/* features */
+
+#features {
+    background-color: blanchedalmond;
+    position: relative;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+}
+
+#features h3 {
+    font-weight: bold;
+    padding: 4%;
+}
+
+#features i {
+    color: #ef8172;
+    /* font-size: 3rem; */
+    margin-bottom: 1rem;
+}
+
+#features i:hover {
+    color: #ff4c68
+}
+
+#features p {
+    color: #8f8f8f;
+    padding: 5%;
+}
+
+
+/* testimonials */
+
+#testimonials {
+    background-color: #ef8172;
+}
+
+.testimonial-image {
+    width: 10%;
+    border-radius: 100%;
+    margin: 20px;
+}
+
+.testimonial-text {
+    font-size: 3rem;
+    line-height: 1.5;
+}
+
+#press {
+    background-color: #ef8172;
+    padding-bottom: 3%;
+}
+
+#press img {
+    width: 15%;
+    margin: 20px 20px 50px
+}
+
+
+/* pricing */
+
+.price-text {
+    font-size: 3rem;
+    padding: 3% 2%;
+    line-height: 1.5;
+}
+
+#pricing {
+    padding: 100px;
+}
+
+#pricing h2 {
+    color: black;
+}
+
+.pricing-column {
+    padding: 2% 3%;
+}
+
+
+/* cta section */
+
+
+/* footer */
+
+.social-icon {
+    margin: 20px 10px;
+}
+
+@media (max-width: 1028px) {
+    .title {
+        text-align: center;
+    }
+    .title-image {
+        position: static;
+        transform: rotate(0);
+    }
 }
