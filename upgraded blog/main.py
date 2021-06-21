@@ -22,13 +22,14 @@ def about():
 def contact():
     return render_template("contact.html")
 
-@app.route('/form-entry', methods=["POST"])
+@app.route("/form-entry", methods=["POST"])
 def receive_data():
-    name = request.form["username"]
-    email = request.form["email"]
-    phone = request.form["phone"]
-    msg = request.form["message"]
-    return f"<h1>Name: {name}, email: {email}, phone: {phone}, message: {msg}</h1>"
+    data = request.form
+    print(data["name"])
+    print(data["email"])
+    print(data["phone"])
+    print(data["message"])
+    return "<h1>Successfully sent your message</h1>"
 
 
 
