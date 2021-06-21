@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import requests 
 from datetime import datetime
 
@@ -22,6 +22,18 @@ def about():
 def contact():
     return render_template("contact.html")
 
+@app.route('/form-entry', methods=["POST"])
+def receive_data():
+    name = request.form["username"]
+    email = request.form["email"]
+    phone = request.form["phone"]
+    msg = request.form["message"]
+    return f"<h1>Name: {name}, email: {email}, phone: {phone}, message: {msg}</h1>"
+
+
+
+    return render_template("contact.html")
+
 @app.route("/blog/<int:blog_id>")
 def get_blog(blog_id):
     id = blog_id - 1
@@ -29,6 +41,8 @@ def get_blog(blog_id):
     response = requests.get(blog_url)
     post = response.json()[id]
     return render_template("post.html", post=post)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
