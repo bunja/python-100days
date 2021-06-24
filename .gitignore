@@ -5,3 +5,4 @@ __pycache__
 venv
 __MACOSX
 .cache
+env
