@@ -42,13 +42,16 @@ def edit(book_id):
         return redirect(url_for('home')) 
     return render_template('edit.html', book = book_to_update)
 
-@app.route('/delete/<int:book_id>', methods=["GET"])
-def delete(book_id):
+@app.route("/delete")
+def delete():
+    book_id = request.args.get('id')
+
+    # DELETE A RECORD BY ID
     book_to_delete = Book.query.get(book_id)
     db.session.delete(book_to_delete)
     db.session.commit()
-    return redirect(url_for('home')) 
-    
+    return redirect(url_for('home'))
+
 
 
 if __name__ == "__main__":
