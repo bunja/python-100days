@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
+from wtforms.fields.simple import HiddenField
 from wtforms.validators import DataRequired
 import requests
 
@@ -29,6 +30,13 @@ class Movie(db.Model):
 
 db.create_all()
 
+# wtf form
+class EditForm(FlaskForm):
+    rating = StringField('Rating', validators=[DataRequired()])
+    review = StringField('Review', validators=[DataRequired()])
+    
+    submit = SubmitField('Done')
+
 # new_movie = Movie(
 #     title="Phone Booth",
 #     year=2002,
@@ -48,7 +56,18 @@ def home():
 
     return render_template('index.html', movies = all_movies)
 
-
+@app.route("/edit", methods=["GET", "POST"])
+def edit():
+    form = EditForm()
+    movie_id = request.args.get('movie_id')
+    movie = Movie.query.get(movie_id)
+    if request.method == "POST":
+        #UPDATE RECORD
+        movie.rating = request.form["rating"]
+        movie.review = request.form["review"]
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template("edit.html", form=form, movie=movie)
 
 if __name__ == '__main__':
     app.run(debug=True)
