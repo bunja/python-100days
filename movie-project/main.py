@@ -37,6 +37,10 @@ class EditForm(FlaskForm):
     
     submit = SubmitField('Done')
 
+class AddMovie(FlaskForm):
+    movie_title = StringField('Movie Title', validators=[DataRequired()])
+    add_movie = SubmitField('Add Movie')
+
 # new_movie = Movie(
 #     title="Phone Booth",
 #     year=2002,
@@ -78,6 +82,14 @@ def delete():
     db.session.delete(movie_to_delete)
     db.session.commit()
     return redirect(url_for('home'))
+
+@app.route("/add", methods=["GET","POST"])
+def add():
+    form = AddMovie()
+    if form.validate_on_submit:
+        title = form.movie_title
+        print(title)
+    return render_template('add.html', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
