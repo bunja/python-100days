@@ -116,10 +116,12 @@ def find():
             year=data["release_date"].split("-")[0],
             img_url=f"{MOVIE_DB_IMAGE_URL}{data['poster_path']}",
             description=data["overview"]
+            
         )
         db.session.add(new_movie)
         db.session.commit()
-        return redirect(url_for("home"))
+        print(new_movie.id)
+        return redirect(url_for("edit", movie_id=new_movie.id))
 
 if __name__ == '__main__':
     app.run(debug=True)
