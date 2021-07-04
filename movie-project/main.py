@@ -15,6 +15,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///movie-collection.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+MOVIE_DB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
+
+
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(250), nullable=False)
@@ -62,7 +65,6 @@ def home():
 
 @app.route("/edit", methods=["GET", "POST"])
 def edit():
-    form = EditForm()
     movie_id = request.args.get('movie_id')
     movie = Movie.query.get(movie_id)
     if request.method == "POST":
@@ -71,6 +73,8 @@ def edit():
         movie.review = request.form["review"]
         db.session.commit()
         return redirect(url_for('home'))
+
+    form = EditForm()
     return render_template("edit.html", form=form, movie=movie)
 
 @app.route("/delete")
@@ -86,9 +90,15 @@ def delete():
 @app.route("/add", methods=["GET","POST"])
 def add():
     form = AddMovie()
-    if form.validate_on_submit:
-        title = form.movie_title
-        print(title)
+
+    if form.validate_on_submit():
+        movie_title = form.movie_title.data
+        print(movie_title)
+        response = requests.get(MOVIE_DB_SEARCH_URL, params={"api_key": MOVIE_DB_API_KEY, "query": movie_title})
+        data = response.json()['results']
+        print(data)
+        return render_template('select.html', movies=data)
+        
     return render_template('add.html', form=form)
 
 if __name__ == '__main__':
