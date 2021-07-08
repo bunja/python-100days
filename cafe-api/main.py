@@ -48,6 +48,20 @@ def get_random_cafe():
         "coffee_price": random_cafe.coffee_price,
     })
 
+@app.route("/all")
+def all():
+    cafes = db.session.query(Cafe).all()
+    return jsonify(cafes=[cafe.to_dict() for cafe in cafes])
+
+@app.route("/search")
+def search():
+    loc = request.args.get('loc')
+    cafe = Cafe.query.filter_by(location=query_location).first()
+    if cafe:
+        return jsonify(cafe=cafe.to_dict())
+    else:
+        return jsonify(error={"Not Found": "Sorry, we don't have a cafe at that location."})
+    
 ## HTTP POST - Create Record
 
 ## HTTP PUT/PATCH - Update Record
