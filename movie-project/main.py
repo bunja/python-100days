@@ -6,6 +6,7 @@ from wtforms import StringField, SubmitField
 from wtforms.fields.simple import HiddenField
 from wtforms.validators import DataRequired
 import requests
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -18,7 +19,7 @@ db = SQLAlchemy(app)
 MOVIE_DB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 MOVIE_DB_INFO_URL = "https://api.themoviedb.org/3/movie"
 MOVIE_DB_IMAGE_URL = "https://image.tmdb.org/t/p/w500"
-
+MOVIE_DB_API_KEY = os.getenv("MOVIE_DB_API_KEY")
 
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
