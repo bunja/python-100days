@@ -24,6 +24,8 @@ class Cafe(db.Model):
     can_take_calls = db.Column(db.Boolean, nullable=False)
     coffee_price = db.Column(db.String(250), nullable=True)
 
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 @app.route("/")
 def home():
@@ -56,7 +58,7 @@ def all():
 @app.route("/search")
 def search():
     loc = request.args.get('loc')
-    cafe = Cafe.query.filter_by(location=query_location).first()
+    cafe = Cafe.query.filter_by(location=loc).first()
     if cafe:
         return jsonify(cafe=cafe.to_dict())
     else:
