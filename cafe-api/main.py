@@ -9,6 +9,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+api_key_secret = "top"
+
 
 ##Cafe TABLE Configuration
 class Cafe(db.Model):
@@ -65,6 +67,7 @@ def search():
         return jsonify(error={"Not Found": "Sorry, we don't have a cafe at that location."})
     
 ## HTTP POST - Create Record
+
 @app.route("/add", methods=["POST"])
 def add():
     new_cafe = Cafe(
@@ -82,7 +85,9 @@ def add():
     db.session.add(new_cafe)
     db.session.commit()
     return jsonify(response={"success":"Successfully added the new cafe"})
+
 ## HTTP PUT/PATCH - Update Record
+
 @app.route("/update-price/<int:cafe_id>", methods=["PATCH"])
 def update_price(cafe_id):
     new_price = request.args.get("new_price")
@@ -90,11 +95,24 @@ def update_price(cafe_id):
     if cafe:
         cafe.coffee_price=new_price
         db.session.commit()
-        return jsonify(response={"success":"Successfully updated the price"})
+        return jsonify(response={"success":"Successfully updated the price"}), 200
     else:
-        return jsonify(response={"fail":"it is never ever going to happen"})
-## HTTP DELETE - Delete Record
+        return jsonify(response={"fail":"it is never ever going to happen"}), 404
 
+## HTTP DELETE - Delete Record
+@app.route("/report-closed/<int:cafe_id>", methods=["DELETE"])
+def closed(cafe_id):
+    api_key = request.args.get("api_key")
+    if api_key == api_key_secret:
+        cafe = Cafe.query.get(cafe_id)
+        if cafe:
+            db.session.delete(cafe)
+            db.session.commit()
+            return jsonify(response={"success":"Successfully deleted"}), 200
+        else:
+            return jsonify(response={"not found":"The cafe with this id was not found in the database"}), 404
+    else:
+        return jsonify(response={"forbidden":"your api key is incorrect"}), 403
 
 if __name__ == '__main__':
     app.run(debug=True)
