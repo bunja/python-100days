@@ -67,6 +67,10 @@ def contact():
 def edit_post():
     pass
 
+@app.route('/new-post', methods=["GET"])
+def make_post():
+    form = CreatePostForm()
+    return render_template("make-post.html", form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
