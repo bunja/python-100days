@@ -23,7 +23,7 @@
             <!-- #Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
             {{ ckeditor.config(name='body') }}
             <!-- This is where the form will go -->
-            {{ wtf.quick_form(form, novalidate=True) }}
+            {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
         </div>
     </div>
 </div>
