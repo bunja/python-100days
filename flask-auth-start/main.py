@@ -19,6 +19,14 @@ class User(UserMixin, db.Model):
 #Line below only required once, when creating DB. 
 # db.create_all()
 
+#Configuring app
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+#user loader function
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/')
 def home():
@@ -37,17 +45,29 @@ def register():
         )
         db.session.add(new_user)
         db.session.commit()
+        login_user(new_user)
         return redirect(url_for('secrets', name=new_user.name))
     return render_template("register.html")
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == "POST":
+        email = request.form.get('email')
+        pwd = request.form.get('password')
+        user = User.query.filter_by(email=email).first()
+        
+        if check_password_hash(user.password, pwd):
+            login_user(user)
+            return redirect(url_for('secrets', name=user.name))    
+
     return render_template("login.html")
 
 
 @app.route('/secrets/<name>')
+@login_required
 def secrets(name):
+    print(current_user.name)
     return render_template("secrets.html", name=name)
 
 
@@ -57,6 +77,7 @@ def logout():
 
 
 @app.route('/download')
+@login_required
 def download():
     return send_from_directory("static", filename="files/cheat_sheet.pdf")
 
