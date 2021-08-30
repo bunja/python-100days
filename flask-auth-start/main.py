@@ -26,6 +26,7 @@ login_manager.init_app(app)
 #user loader function
 @login_manager.user_loader
 def load_user(user_id):
+    #we are getting user from db
     return User.query.get(int(user_id))
 
 @app.route('/')
@@ -36,6 +37,11 @@ def home():
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        if User.query.filter_by(email=request.form.get('email')).first:
+            #User already exists
+            flash("You've already signed up with that email, log in instead!")
+            return redirect(url_for('login'))
+
         pwd = request.form.get('password')
         hashed_pass=generate_password_hash(pwd, method='pbkdf2:sha256', salt_length=8)
         new_user = User(
@@ -46,6 +52,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
+        
         return redirect(url_for('secrets', name=new_user.name))
     return render_template("register.html")
 
@@ -56,11 +63,20 @@ def login():
         email = request.form.get('email')
         pwd = request.form.get('password')
         user = User.query.filter_by(email=email).first()
-        
-        if check_password_hash(user.password, pwd):
+
+        #Email doesn't exist
+        if not user:
+            flash("That email doesn't exist, try again")
+            return redirect(url_for('login'))
+        #Password incorrect
+        elif not check_password_hash(user.password, pwd):
+            flash('Password incorrect, please try again.')
+            return redirect(url_for('login'))
+        #Email exists and password correct
+        else:
             login_user(user)
             return redirect(url_for('secrets', name=user.name))    
-
+    
     return render_template("login.html")
 
 
