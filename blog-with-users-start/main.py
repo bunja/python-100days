@@ -60,6 +60,11 @@ def get_all_posts():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        if User.query.filter_by(email=form.email.data).first():
+            #User already exists
+            flash("You have already signed up with this email. log in instead")
+            return redirect(url_for('login'))
+
         pwd = form.password.data
         hashed_pass=generate_password_hash(pwd, method='pbkdf2:sha256', salt_length=8)
         new_user = User(
@@ -77,14 +82,21 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    if form.validate_on_submit:
+    if form.validate_on_submit():
         email=form.email.data
         pwd=form.password.data
         user = User.query.filter_by(email=email).first()
         #email doesn't exist
-        if  user and check_password_hash(user.password, pwd):
-            
-            login_user(user) 
+        if not user:
+            flash("That email doesn't exist, try again")
+            return redirect(url_for('login'))
+        #Password incorrect
+        elif not check_password_hash(user.password, pwd):
+            flash('Password incorrect, please try again.')
+            return redirect(url_for('login'))
+        #Email exists and password correct
+        else:
+            login_user(user)
             return redirect(url_for("get_all_posts"))
     return render_template("login.html", form=form)
 
