@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import CreatePostForm, RegisterForm, LoginForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 from flask_gravatar import Gravatar
 from functools import wraps
 
@@ -26,7 +26,6 @@ db = SQLAlchemy(app)
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
     id = db.Column(db.Integer, primary_key=True)
-    author = db.Column(db.String(250), nullable=False)
     title = db.Column(db.String(250), unique=True, nullable=False)
     subtitle = db.Column(db.String(250), nullable=False)
     date = db.Column(db.String(250), nullable=False)
@@ -36,6 +35,7 @@ class BlogPost(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     #Create reference to the User object, the "posts" refers to the posts protperty in the User class.
     author = relationship("User", back_populates="posts")
+    comments = relationship("Comment", back_populates="comments")
    
 
 ##CREATE TABLE IN DB
@@ -48,6 +48,18 @@ class User(UserMixin, db.Model):
     #This will act like a List of BlogPost objects attached to each User. 
     #The "author" refers to the author property in the BlogPost class.
     posts = relationship("BlogPost", back_populates="author")
+    comments = relationship("Comment", back_populates="comment_author")
+
+class Comment( db.Model):
+    __tablename__ = "comments"
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.Text, nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    comment_author = relationship("User", back_populates="comments")
+    post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
+    post = relationship("BlogPost", back_populates="comments")
+
+
 db.create_all()
 
 #Configuring app
@@ -129,8 +141,9 @@ def logout():
 
 @app.route("/post/<int:post_id>")
 def show_post(post_id):
+    form = CommentForm()
     requested_post = BlogPost.query.get(post_id)
-    return render_template("post.html", post=requested_post, current_user=current_user)
+    return render_template("post.html", post=requested_post, current_user=current_user, form=form)
 
 
 @app.route("/about")
@@ -143,7 +156,7 @@ def contact():
     return render_template("contact.html", current_user=current_user)
 
 
-@app.route("/new-post")
+@app.route("/new-post", methods=["GET", "POST"])
 @admin_only
 def add_new_post():
     form = CreatePostForm()
