@@ -10,7 +10,7 @@
                     <h1>{{post.title}}</h1>
                     <h2 class="subheading">{{post.subtitle}}</h2>
                     <span class="meta">Posted by
-              <a href="#">{{post.author}}</a>
+              <a href="#">{{post.author.name}}</a>
               on {{post.date}}</span>
                 </div>
             </div>
@@ -41,7 +41,9 @@
                                 <img src="https://pbs.twimg.com/profile_images/744849215675838464/IH0FNIXk.jpg" />
                             </div>
                             <div class="commentText">
-                                <p>Some comment</p>
+                                <div class="col-lg-8 col-md-10 mx-auto">
+                                    {{ ckeditor.load() }} {{ ckeditor.config(name='comment') }} {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+                                </div>
                                 <span class="date sub-text">comment author name</span>
                             </div>
                         </li>
