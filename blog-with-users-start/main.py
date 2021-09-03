@@ -60,7 +60,7 @@ class Comment( db.Model):
     parent_post = relationship("BlogPost", back_populates="comments")
 
 
-db.create_all()
+# db.create_all()
 
 #Configuring app
 login_manager = LoginManager()
@@ -80,6 +80,15 @@ def admin_only(f):
             return abort(403, {"error": "you don't have the right"})
         return f(*args, **kwargs)
     return decorated_function
+
+gravatar = Gravatar(app,
+                    size=100,
+                    rating='g',
+                    default='retro',
+                    force_default=False,
+                    force_lower=False,
+                    use_ssl=False,
+                    base_url=None)
 
 @app.route('/')
 def get_all_posts():
