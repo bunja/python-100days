@@ -35,7 +35,7 @@ class BlogPost(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     #Create reference to the User object, the "posts" refers to the posts protperty in the User class.
     author = relationship("User", back_populates="posts")
-    comments = relationship("Comment", back_populates="comments")
+    comments = relationship("Comment", back_populates="parent_post")
    
 
 ##CREATE TABLE IN DB
@@ -53,11 +53,11 @@ class User(UserMixin, db.Model):
 class Comment( db.Model):
     __tablename__ = "comments"
     id = db.Column(db.Integer, primary_key=True)
-    comment = db.Column(db.Text, nullable=False)
+    text = db.Column(db.Text, nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     comment_author = relationship("User", back_populates="comments")
     post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
-    post = relationship("BlogPost", back_populates="comments")
+    parent_post = relationship("BlogPost", back_populates="comments")
 
 
 db.create_all()
@@ -139,10 +139,19 @@ def logout():
     return redirect(url_for('get_all_posts'))
 
 
-@app.route("/post/<int:post_id>")
+@app.route("/post/<int:post_id>", methods=["POST", "GET"])
+@login_required
 def show_post(post_id):
     form = CommentForm()
     requested_post = BlogPost.query.get(post_id)
+    if form.validate_on_submit():
+        new_comment = Comment(
+            text = form.comment.data,
+            comment_author = current_user,
+            parent_post = requested_post
+        )
+        db.session.add(new_comment)
+        db.session.commit()
     return render_template("post.html", post=requested_post, current_user=current_user, form=form)
 
 
