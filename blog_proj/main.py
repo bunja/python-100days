@@ -20,11 +20,54 @@ class BlogPost(db.Model):
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
 
-db.create_all()
+# db.create_all()
     
 @app.route('/')
-def home():
-    return render_template("index.html")
+def get_all_posts():
+    posts = BlogPost.query.all()
+
+    print(posts)
+    return render_template("index.html", all_posts=posts)
+
+@app.route('/register', methods=["POST", "GET"])
+def register():
+    pass
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    pass
+
+@app.route('/logout')
+def logout():
+    pass
+
+@app.route("/post/<int:post_id>", methods=["POST", "GET"])
+# @login_required
+def show_post(post_id):
+    pass
+
+@app.route("/about")
+def about():
+    pass
+
+@app.route("/contact")
+def contact():
+    pass
+
+@app.route("/new-post", methods=["GET", "POST"])
+# @admin_only
+def add_new_post():
+    pass
+
+@app.route("/edit-post/<int:post_id>")
+# @admin_only
+def edit_post(post_id):
+    pass
+
+@app.route("/delete/<int:post_id>")
+# @admin_only
+def delete_post(post_id):
+    pass
 
 if __name__ == "__main__":   
     app.run(port=5000, debug=True)
