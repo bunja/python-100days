@@ -44,7 +44,8 @@ def logout():
 @app.route("/post/<int:post_id>", methods=["POST", "GET"])
 # @login_required
 def show_post(post_id):
-    pass
+    requested_post = BlogPost.query.get(post_id)
+    return render_template("post.html", post=requested_post)
 
 @app.route("/about")
 def about():
