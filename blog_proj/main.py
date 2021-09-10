@@ -31,7 +31,7 @@ def get_all_posts():
     posts = BlogPost.query.all()
 
     print(posts)
-    return render_template("index.html", all_posts=posts)
+    return render_template("schmindex.html", all_posts=posts)
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
@@ -49,7 +49,7 @@ def logout():
 # @login_required
 def show_post(post_id):
     requested_post = BlogPost.query.get(post_id)
-    return render_template("post.html", post=requested_post)
+    return render_template("post-second.html", post=requested_post)
 
 @app.route("/about")
 def about():
