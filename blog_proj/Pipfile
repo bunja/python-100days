@@ -8,6 +8,9 @@ flask = "*"
 flask-bootstrap = "*"
 sqlalchemy = "*"
 flask-sqlalchemy = "*"
+flask-wtf = "*"
+wtforms = "*"
+flask-ckeditor = "*"
 
 [dev-packages]
 
