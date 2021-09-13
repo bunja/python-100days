@@ -2,9 +2,10 @@ from flask import Flask, render_template, redirect, url_for, flash, abort, jsoni
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from forms import CreatePostForm, RegisterForm
+from forms import CreatePostForm, RegisterForm, LoginForm
 from flask_ckeditor import CKEditor
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -53,11 +54,30 @@ def get_all_posts():
 @app.route('/register', methods=["POST", "GET"])
 def register():
     form = RegisterForm()
+    if form.validate_on_submit():
+        if User.query.filter_by(email=form.email.data).first():
+            # User already exists
+            flash("You have already created an account. Log in instead.")
+            return redirect(url_for('login'))
+        
+        password = form.password.data
+        hashed_pass = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+        new_user = User(
+            email=form.email.data,
+            password=hashed_pass,
+            name=form.name.data
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user)
+        return redirect(url_for("get_all_posts"))
+
     return render_template("register.html", form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    pass
+    form = LoginForm()
+    return render_template("login.html", form=form)
 
 @app.route('/logout')
 def logout():
