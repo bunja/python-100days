@@ -2,8 +2,9 @@ from flask import Flask, render_template, redirect, url_for, flash, abort, jsoni
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from forms import CreatePostForm
+from forms import CreatePostForm, RegisterForm
 from flask_ckeditor import CKEditor
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -15,6 +16,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///myblog.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+##CREATE TABLE IN DB
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(1000))
+    #This will act like a List of BlogPost objects attached to each User. 
+    #The "author" refers to the author property in the BlogPost class.
+    posts = relationship("BlogPost", back_populates="author")
+    
+
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
     id = db.Column(db.Integer, primary_key=True)
@@ -23,8 +36,12 @@ class BlogPost(db.Model):
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
+    #Create Foreign Key, "users.id" the users refers to the tablename of User.
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    author = relationship("User", back_populates="posts")
 
-# db.create_all()
+
+db.create_all()
     
 @app.route('/')
 def get_all_posts():
@@ -35,7 +52,8 @@ def get_all_posts():
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
-    pass
+    form = RegisterForm()
+    return render_template("register.html", form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
