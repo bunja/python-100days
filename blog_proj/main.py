@@ -6,6 +6,8 @@ from forms import CommentForm, CreatePostForm, RegisterForm, LoginForm
 from flask_ckeditor import CKEditor
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+from datetime import date
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -63,12 +65,22 @@ class Comment( db.Model):
 
 
 # db.create_all()
-    
-@app.route('/')
-def get_all_posts():
-    posts = BlogPost.query.all()
 
-    print(posts)
+#admin only decorator
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.id != 2:
+            return abort(403, {"error": "you are unautorized for this action"})
+        return f(*args, **kwargs)
+    return decorated_function
+
+    
+@app.route('/posts/<int:page_num>')
+def get_all_posts(page_num):
+    posts = BlogPost.query.paginate(per_page=2, page=page_num, error_out=True)
+    print("FUCK+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print(posts.page)
     return render_template("schmindex.html", all_posts=posts, current_user=current_user)
 
 @app.route('/register', methods=["POST", "GET"])
@@ -90,7 +102,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
-        return redirect(url_for("get_all_posts"))
+        return redirect(url_for("get_all_posts", page_num=1))
 
     return render_template("register.html", form=form, current_user=current_user)
 
@@ -123,7 +135,7 @@ def logout():
     return redirect(url_for('get_all_posts'))
 
 @app.route("/post/<int:post_id>", methods=["POST", "GET"])
-# @login_required
+@login_required
 def show_post(post_id):
     form = CommentForm()
     requested_post = BlogPost.query.get(post_id)
@@ -149,9 +161,22 @@ def contact():
     pass
 
 @app.route("/new-post", methods=["GET", "POST"])
-# @admin_only
+@admin_only
 def add_new_post():
-    pass
+    form = CreatePostForm()
+    if form.validate_on_submit():
+        new_post = BlogPost(
+            title=form.title.data,
+            subtitle=form.subtitle.data,
+            body=form.body.data,
+            img_url=form.img_url.data,
+            author=current_user,
+            date=date.today().strftime("%B %d, %Y")
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for("get_all_posts", page_num=0))
+    return render_template("make-post.html", form=form, current_user=current_user)
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
 # @admin_only

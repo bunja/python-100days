@@ -20,9 +20,10 @@
                         <figure class="mb-4"><img class="img-fluid rounded" src={{post.img_url}} alt="..." /></figure>
                         <!-- Post content-->
                         <section class="mb-5">
-                            <p class="fs-5 mb-4">{{ post.body }}</p>
+                            <p class="fs-5 mb-4">{{ post.body|safe }}</p>
+                            {% if current_user.id == 1 %}
                             <a class="btn btn-primary float-right" href="{{url_for('edit_post', post_id=post.id)}}">Edit Post</a>
-                            
+                            {% endif%}
                         </section>
                     </article>
                     <!-- Comments section-->
