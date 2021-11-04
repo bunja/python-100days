@@ -53,6 +53,8 @@ class BlogPost(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     author = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="parent_post")
+    categorie_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+    categorie = relationship("Categorie", back_populates="posts_cat")
 
 class Comment( db.Model):
     __tablename__ = "comments"
@@ -62,6 +64,13 @@ class Comment( db.Model):
     comment_author = relationship("User", back_populates="comments")
     post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
     parent_post = relationship("BlogPost", back_populates="comments")
+
+class Categorie( db.Model):
+    __tablename__ = "categories"
+    id = db.Column(db.Integer, primary_key=True)
+    categorie = db.Column(db.String(250), unique=True)
+    posts_cat = relationship("BlogPost", back_populates="categorie")
+
 
 
 # db.create_all()
@@ -78,10 +87,11 @@ def admin_only(f):
     
 @app.route('/posts/<int:page_num>')
 def get_all_posts(page_num):
-    posts = BlogPost.query.paginate(per_page=2, page=page_num, error_out=True)
-    print("FUCK+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print(posts.page)
-    return render_template("schmindex.html", all_posts=posts, current_user=current_user)
+    posts = BlogPost.query.paginate(per_page=4, page=page_num, error_out=True)
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    categories = Categorie.query.all()
+    print(categories)
+    return render_template("schmindex.html", all_posts=posts, current_user=current_user, categories = categories)
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
@@ -125,14 +135,14 @@ def login():
         # email exists and password is correct
         else:
             login_user(user)
-            return redirect(url_for("get_all_posts"))
+            return redirect(url_for("get_all_posts", page_num=1))
     return render_template("login.html", form=form, current_user=current_user)
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('get_all_posts'))
+    return redirect(url_for('get_all_posts', page_num=1))
 
 @app.route("/post/<int:post_id>", methods=["POST", "GET"])
 @login_required
@@ -164,18 +174,31 @@ def contact():
 @admin_only
 def add_new_post():
     form = CreatePostForm()
+    res = form.categories.data
+    print(res, type(res))
+
     if form.validate_on_submit():
+        print(form)
         new_post = BlogPost(
             title=form.title.data,
             subtitle=form.subtitle.data,
             body=form.body.data,
             img_url=form.img_url.data,
             author=current_user,
-            date=date.today().strftime("%B %d, %Y")
+            categorie_id=res,
+            date=date.today().strftime("%B %d, %Y"),
+
         )
         db.session.add(new_post)
         db.session.commit()
-        return redirect(url_for("get_all_posts", page_num=0))
+        return redirect(url_for("get_all_posts", page_num=1))
+    
+    categories = Categorie.query.all()
+    choices = []
+    for c in categories:
+        choices.append((c.id, c.categorie))
+    
+    form.categories.choices = choices
     return render_template("make-post.html", form=form, current_user=current_user)
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
